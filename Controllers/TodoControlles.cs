@@ -1,25 +1,64 @@
 using Microsoft.AspNetCore.Mvc;
-
+using TodoApp.Models;
+using TodoApp.Providers;
 namespace TodoApp.Controllers;
 
 [ApiController]
 [Route("[controller]")]
-public class WeatherForecastController : ControllerBase
+public class TodoController(IDataprovider _dataProvider) : ControllerBase
 {
-    private static readonly string[] Summaries =
-    [
-        "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
-    ];
-
-    [HttpGet(Name = "GetWeatherForecast")]
-    public IEnumerable<WeatherForecast> Get()
+//get all todos
+    [HttpGet(Name = "GetAllTodos")]
+    public async Task<IActionResult> GetAllTodos()
     {
-        return Enumerable.Range(1, 5).Select(index => new WeatherForecast
-        {
-            Date = DateOnly.FromDateTime(DateTime.Now.AddDays(index)),
-            TemperatureC = Random.Shared.Next(-20, 55),
-            Summary = Summaries[Random.Shared.Next(Summaries.Length)]
-        })
-        .ToArray();
+        var todos = await _dataProvider.GetAllTodosAsync();
+        return Ok(todos);
     }
+
+    //get todo by id
+    [HttpGet("{id}", Name = "GetTodoById")]
+    public async Task<IActionResult> GetTodoById(string id)
+    {
+        var todo = await _dataProvider.GetTodoByIdAsync(id);
+        if (todo == null)
+        {
+            return NotFound();
+        }
+        return Ok(todo);
+    }
+
+    //create todo
+    [HttpPost(Name = "CreateTodo")]
+    public async Task<IActionResult> CreateTodo([FromBody] TodoRequestModels.CreateTodoRequest todo)
+    {
+        var createdTodo = await _dataProvider.CreateTodoAsync(todo);
+        return CreatedAtAction(nameof(GetTodoById), new { id = createdTodo.Id }, createdTodo);
+    }
+
+    //update todo
+    [HttpPut("{id}", Name = "UpdateTodo")]
+    public async Task<IActionResult> UpdateTodo(string id, [FromBody] TodoRequestModels.UpdateTodoRequest todo)
+    {
+        var updatedTodo = await _dataProvider.UpdateTodoAsync(id, todo);
+        if (updatedTodo == null)
+        {
+            return NotFound();
+        }
+        return Ok(updatedTodo);
+    }
+
+    //delete todo
+    [HttpDelete("{id}", Name = "DeleteTodo")]
+    public async Task<IActionResult> DeleteTodo(string id)
+    {
+        var deleted = await _dataProvider.DeleteTodoAsync(id);
+        if (!deleted)
+        {
+            return NotFound();
+        }
+        return Ok();
+    }   
+
+
+
 }
