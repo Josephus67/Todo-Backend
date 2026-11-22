@@ -1,7 +1,29 @@
-/appsettings.json
-/appsettings.Development.json
+## Build output
 bin/
 obj/
+
+## User/IDE settings
 *.user
 *.suo
 .vs/
+.vscode/
+.idea/
+*.swp
+*~
+
+## Secrets and environment config
+appsettings.json
+appsettings.Development.json
+appsettings.*.json
+
+## .NET
+*.DotSettings.user
+project.lock.json
+
+## NuGet
+*.nupkg
+**/packages/
+
+## macOS
+.DS_Store
+Thumbs.db
